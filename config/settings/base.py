@@ -1,10 +1,15 @@
 from pathlib import Path
 
+import environ
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = "change-me"
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = False
+SECRET_KEY = env("SECRET_KEY", default="change-me")
+
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = []
 
