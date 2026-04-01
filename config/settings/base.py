@@ -20,6 +20,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
+    "apps.common",
+    "apps.accounts",
+    "apps.organizations",
+    "apps.plans",
+    "apps.forms",
+    "apps.submissions",
+    "apps.analysis",
+    "apps.dashboard",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +68,7 @@ DATABASES = {
         "USER": env("POSTGRES_USER"),
         "PASSWORD": env("POSTGRES_PASSWORD"),
         "HOST": env("POSTGRES_HOST", default="localhost"),
-        "PORT": env("POSTGRES_PORT", default="5432"),
+        "PORT": env("POSTGRES_PORT", default="5434"),
     }
 }
 
