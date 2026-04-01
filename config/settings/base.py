@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
+
     "apps.common",
     "apps.accounts",
     "apps.organizations",
@@ -71,6 +71,8 @@ DATABASES = {
         "PORT": env("POSTGRES_PORT", default="5434"),
     }
 }
+
+AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
