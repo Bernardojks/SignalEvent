@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.organizations.models import Organization
+
+
+@admin.register(Organization)
+class OrganizationAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "slug", "created_at")
+    search_fields = ("name", "slug")
