@@ -88,3 +88,81 @@ class SubmissionAnswer(BaseModel):
 
     def __str__(self):
         return f"Answer for {self.question.title}"
+    
+class SubmissionTechnicalData(BaseModel):
+    submission = models.OneToOneField(
+        FeedbackSubmission,
+        on_delete=models.CASCADE,
+        related_name="technical_data",
+    )
+
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    fingerprint_hash = models.CharField(max_length=255, blank=True)
+
+    accept_language = models.CharField(max_length=255, blank=True)
+    referer = models.URLField(blank=True)
+
+    captcha_provider = models.CharField(max_length=100, blank=True)
+    captcha_passed = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["ip_address"]),
+            models.Index(fields=["fingerprint_hash"]),
+            models.Index(fields=["ip_address", "created_at"]),
+            models.Index(fields=["fingerprint_hash", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"Technical data for {self.submission.public_id}"
+
+
+class SubmissionRiskAssessment(BaseModel):
+    class RiskLevel(models.TextChoices):
+        LOW = "low", "Low"
+        MEDIUM = "medium", "Medium"
+        HIGH = "high", "High"
+
+    class Decision(models.TextChoices):
+        ACCEPTED = "accepted", "Accepted"
+        SUSPICIOUS = "suspicious", "Suspicious"
+        REJECTED = "rejected", "Rejected"
+
+    submission = models.OneToOneField(
+        FeedbackSubmission,
+        on_delete=models.CASCADE,
+        related_name="risk_assessment",
+    )
+
+    risk_score = models.PositiveSmallIntegerField()
+    risk_level = models.CharField(
+        max_length=20,
+        choices=RiskLevel.choices,
+    )
+    decision = models.CharField(
+        max_length=20,
+        choices=Decision.choices,
+    )
+
+    reasons = models.JSONField(default=list, blank=True)
+    engine_version = models.CharField(max_length=50, default="v1")
+
+    evaluated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["decision"]),
+            models.Index(fields=["risk_level"]),
+            models.Index(fields=["evaluated_at"]),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(risk_score__gte=0) & models.Q(risk_score__lte=100),
+                name="submission_risk_score_between_0_and_100",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Risk assessment for {self.submission.public_id}"
+    
