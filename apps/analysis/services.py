@@ -5,6 +5,12 @@ from apps.analysis.models import AnalysisJob, FeedbackAnalysis
 from apps.analysis.providers.fake_provider import FakeAnalysisProvider
 
 
+def create_analysis_job(submission):
+    return AnalysisJob.objects.create(
+        submission=submission,
+        status=AnalysisJob.Status.PENDING,
+    )
+
 def build_submission_text(submission):
     text_answers = (
         submission.answers.filter(question__question_type="text")
@@ -71,3 +77,4 @@ def process_analysis_job(job: AnalysisJob):
         submission.save(update_fields=["status", "updated_at"])
 
         raise
+
