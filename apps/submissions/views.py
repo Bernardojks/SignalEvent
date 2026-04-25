@@ -57,7 +57,6 @@ class PublicFeedbackSubmissionCreateAPIView(APIView):
             form=form,
             answers_data=answers_data,
             technical_data=serializer.validated_data["technical_data"],
-            risk_data=serializer.validated_data["risk_data"],
         )
 
         return Response(

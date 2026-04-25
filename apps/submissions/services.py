@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
+from apps.submissions.risk_engine import calculate_risk
 from apps.analysis.services import create_analysis_job
 from apps.plans.services import has_available_analysis_quota, consume_analysis_quota
 from apps.submissions.models import (
@@ -76,7 +77,7 @@ def create_submission_risk_assessment(submission, risk_data):
     return assessment
 
 @transaction.atomic
-def submit_feedback(form, answers_data, technical_data, risk_data):
+def submit_feedback(form, answers_data, technical_data):
     submission = create_submission(form=form)
 
     create_submission_answers(
@@ -89,6 +90,11 @@ def submit_feedback(form, answers_data, technical_data, risk_data):
         technical_data=technical_data,
     )
 
+    risk_data = calculate_risk(
+        technical_data=technical_data,
+        answers_data=answers_data,
+    )
+
     assessment = create_submission_risk_assessment(
         submission=submission,
         risk_data=risk_data,
@@ -99,8 +105,7 @@ def submit_feedback(form, answers_data, technical_data, risk_data):
 
     has_text_answers = submission.answers.filter(
         question__question_type="text",
-        text_value__gt="",
-    ).exists()
+    ).exclude(text_value="").exists()
 
     if has_text_answers and has_available_analysis_quota(submission.organization):
         consume_analysis_quota(
@@ -108,7 +113,11 @@ def submit_feedback(form, answers_data, technical_data, risk_data):
             submission=submission,
         )
 
-        create_analysis_job(submission=submission)
+        job = create_analysis_job(submission=submission)
+
+        from apps.analysis.tasks import process_analysis_job_task
+
+        process_analysis_job_task.delay(job.id)
 
         submission.analysis_eligible = True
         submission.status = FeedbackSubmission.Status.QUEUED_FOR_ANALYSIS

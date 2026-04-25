@@ -24,22 +24,9 @@ class SubmissionTechnicalDataInputSerializer(serializers.Serializer):
     captcha_passed = serializers.BooleanField(default=False)
 
 
-class SubmissionRiskAssessmentInputSerializer(serializers.Serializer):
-    risk_score = serializers.IntegerField()
-    risk_level = serializers.ChoiceField(choices=["low", "medium", "high"])
-    decision = serializers.ChoiceField(choices=["accepted", "suspicious", "rejected"])
-    reasons = serializers.ListField(
-        child=serializers.CharField(),
-        required=False,
-        default=list,
-    )
-    engine_version = serializers.CharField(required=False, default="v1")
-
-
 class PublicFeedbackSubmissionCreateSerializer(serializers.Serializer):
     answers = SubmissionAnswerInputSerializer(many=True)
     technical_data = SubmissionTechnicalDataInputSerializer()
-    risk_data = SubmissionRiskAssessmentInputSerializer()
 
     def validate(self, attrs):
         answers = attrs["answers"]
