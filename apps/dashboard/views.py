@@ -1,3 +1,16 @@
-from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
+from apps.dashboard.selectors import get_dashboard_overview
+from apps.organizations.models import Organization
+
+
+class DashboardOverviewAPIView(APIView):
+    def get(self, request):
+        organization = Organization.objects.first()
+
+        if not organization:
+            return Response({"detail": "No organization found."}, status=404)
+
+        data = get_dashboard_overview(organization)
+        return Response(data)
