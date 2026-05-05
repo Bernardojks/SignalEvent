@@ -30,3 +30,31 @@ class PublicFeedbackFormSerializer(serializers.ModelSerializer):
             "status",
             "questions",
         ]
+
+
+class FeedbackFormSerializer(serializers.ModelSerializer):
+    questions = FormQuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FeedbackForm
+        fields = [
+            "id",
+            "public_id",
+            "name",
+            "description",
+            "status",
+            "questions",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "public_id", "created_at", "updated_at"]
+
+
+class FeedbackFormCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackForm
+        fields = [
+            "name",
+            "description",
+            "status",
+        ]

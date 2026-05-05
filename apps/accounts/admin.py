@@ -8,12 +8,13 @@ from apps.accounts.models import User
 class UserAdmin(DjangoUserAdmin):
     model = User
     ordering = ("id",)
-    list_display = ("email", "full_name", "is_staff", "is_active")
-    search_fields = ("email", "full_name")
+    list_display = ("email", "full_name", "organization", "is_staff", "is_active")
+    search_fields = ("email", "full_name", "organization__name")
+    list_filter = ("organization", "is_staff", "is_active")
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Personal info", {"fields": ("full_name",)}),
+        ("Personal info", {"fields": ("full_name", "organization")}),
         (
             "Permissions",
             {
@@ -37,6 +38,7 @@ class UserAdmin(DjangoUserAdmin):
                 "fields": (
                     "email",
                     "full_name",
+                    "organization",
                     "password1",
                     "password2",
                     "is_staff",
