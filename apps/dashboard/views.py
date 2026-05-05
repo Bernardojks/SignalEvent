@@ -7,7 +7,7 @@ from apps.organizations.models import Organization
 
 class DashboardOverviewAPIView(APIView):
     def get(self, request):
-        organization = Organization.objects.first()
+        organization = request.user.organization
 
         if not organization:
             return Response({"detail": "No organization found."}, status=404)
