@@ -3,6 +3,8 @@ from django.urls import path
 from apps.forms.views import (
     FeedbackFormDetailAPIView,
     FeedbackFormListCreateAPIView,
+    FormQuestionDetailAPIView,
+    FormQuestionListCreateAPIView,
     PublicFeedbackFormDetailAPIView,
 )
 
@@ -21,5 +23,15 @@ urlpatterns = [
         "forms/<int:pk>/",
         FeedbackFormDetailAPIView.as_view(),
         name="feedback-form-detail",
+    ),
+    path(
+        "forms/<int:form_id>/questions/",
+        FormQuestionListCreateAPIView.as_view(),
+        name="form-question-list-create",
+    ),
+    path(
+        "forms/<int:form_id>/questions/<int:pk>/",
+        FormQuestionDetailAPIView.as_view(),
+        name="form-question-detail",
     ),
 ]

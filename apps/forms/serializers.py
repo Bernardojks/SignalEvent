@@ -18,6 +18,20 @@ class FormQuestionSerializer(serializers.ModelSerializer):
         ]
 
 
+class FormQuestionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FormQuestion
+        fields = [
+            "title",
+            "description",
+            "question_type",
+            "is_required",
+            "order",
+            "min_value",
+            "max_value",
+        ]
+
+
 class PublicFeedbackFormSerializer(serializers.ModelSerializer):
     questions = FormQuestionSerializer(many=True, read_only=True)
 
