@@ -47,8 +47,7 @@ class FeedbackFormListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(organization=self.request.user.organization)
 
 
-class FeedbackFormDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = FeedbackFormSerializer
+class FeedbackFormDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -58,6 +57,11 @@ class FeedbackFormDetailAPIView(generics.RetrieveAPIView):
             )
             .prefetch_related("questions")
         )
+
+    def get_serializer_class(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            return FeedbackFormCreateSerializer
+        return FeedbackFormSerializer
 
 
 class FormQuestionListCreateAPIView(generics.ListCreateAPIView):
