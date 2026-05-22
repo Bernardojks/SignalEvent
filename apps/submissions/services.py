@@ -76,6 +76,33 @@ def create_submission_risk_assessment(submission, risk_data):
 
     return assessment
 
+
+def apply_suspicious_submission_policy(organization, risk_data):
+    if risk_data["decision"] != SubmissionRiskAssessment.Decision.SUSPICIOUS:
+        return risk_data
+
+    adjusted_risk_data = {
+        **risk_data,
+        "reasons": list(risk_data.get("reasons", [])),
+    }
+
+    if (
+        organization.suspicious_submission_policy
+        == organization.SuspiciousSubmissionPolicy.ACCEPT
+    ):
+        adjusted_risk_data["decision"] = SubmissionRiskAssessment.Decision.ACCEPTED
+        adjusted_risk_data["reasons"].append("suspicious_accepted_by_policy")
+        return adjusted_risk_data
+
+    if (
+        organization.suspicious_submission_policy
+        == organization.SuspiciousSubmissionPolicy.REJECT
+    ):
+        adjusted_risk_data["decision"] = SubmissionRiskAssessment.Decision.REJECTED
+        adjusted_risk_data["reasons"].append("suspicious_rejected_by_policy")
+
+    return adjusted_risk_data
+
 @transaction.atomic
 def submit_feedback(form, answers_data, technical_data):
     submission = create_submission(form=form)
@@ -93,6 +120,11 @@ def submit_feedback(form, answers_data, technical_data):
     risk_data = calculate_risk(
         technical_data=technical_data,
         answers_data=answers_data,
+        organization=form.organization,
+    )
+    risk_data = apply_suspicious_submission_policy(
+        organization=form.organization,
+        risk_data=risk_data,
     )
 
     assessment = create_submission_risk_assessment(

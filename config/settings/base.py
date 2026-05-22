@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -7,7 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY", default="change-me")
+SECRET_KEY = env(
+    "SECRET_KEY",
+    default="signalevent-dev-secret-key-please-change-in-production",
+)
 
 DEBUG = env.bool("DEBUG", default=False)
 
@@ -31,6 +35,7 @@ INSTALLED_APPS = [
     "apps.dashboard",
 
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -102,14 +107,54 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CACHES = {
+    "default": {
+        "BACKEND": env(
+            "CACHE_BACKEND",
+            default="django.core.cache.backends.locmem.LocMemCache",
+        ),
+        "LOCATION": env("CACHE_LOCATION", default="signalevent-cache"),
+    }
+}
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
+PUBLIC_SUBMISSION_PROTECTION = {
+    "request_ip_limit": env.int("PUBLIC_SUBMISSION_REQUEST_IP_LIMIT", default=15),
+    "request_ip_window_seconds": env.int(
+        "PUBLIC_SUBMISSION_REQUEST_IP_WINDOW_SECONDS",
+        default=300,
+    ),
+    "source_limit": env.int("PUBLIC_SUBMISSION_SOURCE_LIMIT", default=5),
+    "source_window_seconds": env.int(
+        "PUBLIC_SUBMISSION_SOURCE_WINDOW_SECONDS",
+        default=600,
+    ),
+    "source_cooldown_seconds": env.int(
+        "PUBLIC_SUBMISSION_SOURCE_COOLDOWN_SECONDS",
+        default=30,
+    ),
+    "duplicate_window_seconds": env.int(
+        "PUBLIC_SUBMISSION_DUPLICATE_WINDOW_SECONDS",
+        default=600,
+    ),
 }
 
 CELERY_BROKER_URL = env(

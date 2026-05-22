@@ -147,3 +147,29 @@ class FeedbackFormCreateSerializer(serializers.ModelSerializer):
             "description",
             "status",
         ]
+
+
+class FormQuestionReorderSerializer(serializers.Serializer):
+    question_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False,
+    )
+
+
+class FeedbackFormListQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=FeedbackForm.Status.choices,
+        required=False,
+    )
+    search = serializers.CharField(required=False, allow_blank=False)
+    ordering = serializers.ChoiceField(
+        choices=[
+            "created_at",
+            "-created_at",
+            "name",
+            "-name",
+            "status",
+            "-status",
+        ],
+        required=False,
+    )
